@@ -1,7 +1,7 @@
-// DisplayDisconnect — menu bar app to disconnect / reconnect displays (like BetterDisplay's "Connect this display").
+// ScreenToggle — menu bar app to disconnect / reconnect displays (like BetterDisplay's "Connect this display").
 // Uses the private CoreGraphics symbol CGSConfigureDisplayEnabled (no public API exists for this).
-// Build: ./build.sh     Run: open DisplayDisconnect.app
-// CLI:   DisplayDisconnect.app/Contents/MacOS/DisplayDisconnect list | disconnect <id> | connect <id>
+// Build: ./build.sh     Run: open ScreenToggle.app
+// CLI:   ScreenToggle.app/Contents/MacOS/ScreenToggle list | disconnect <id> | connect <id>
 
 import Carbon.HIToolbox
 import Cocoa
@@ -81,16 +81,16 @@ enum DisplayManager {
         }
         var config: CGDisplayConfigRef?
         let begin = CGBeginDisplayConfiguration(&config)
-        guard begin == .success else { NSLog("DisplayDisconnect: begin failed \(begin.rawValue)"); return false }
+        guard begin == .success else { NSLog("ScreenToggle: begin failed \(begin.rawValue)"); return false }
         let err = CGSConfigureDisplayEnabled(config, id, enable)
         guard err == .success else {
-            NSLog("DisplayDisconnect: CGSConfigureDisplayEnabled(\(id), \(enable)) failed \(err.rawValue)")
+            NSLog("ScreenToggle: CGSConfigureDisplayEnabled(\(id), \(enable)) failed \(err.rawValue)")
             CGCancelDisplayConfiguration(config)
             return false
         }
         // .forSession: the change is reverted at logout/reboot, so you can't get stuck.
         let done = CGCompleteDisplayConfiguration(config, .forSession)
-        guard done == .success else { NSLog("DisplayDisconnect: complete failed \(done.rawValue)"); return false }
+        guard done == .success else { NSLog("ScreenToggle: complete failed \(done.rawValue)"); return false }
 
         var parked = parkedDisplays()
         if enable { parked[String(id)] = nil } else { parked[String(id)] = name }
@@ -108,7 +108,7 @@ enum DisplayManager {
         candidates.formUnion(ids(online: true))
         let ordered = candidates.sorted { CGDisplayIsBuiltin($0) != 0 && CGDisplayIsBuiltin($1) == 0 }
         for id in ordered where setEnabled(id, true) {
-            NSLog("DisplayDisconnect: no active display left, re-enabled \(id)")
+            NSLog("ScreenToggle: no active display left, re-enabled \(id)")
             return true
         }
         return false
@@ -158,7 +158,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let hotKeyID = EventHotKeyID(signature: OSType(0x4444_4953), id: 1) // 'DDIS'
         let err = RegisterEventHotKey(UInt32(kVK_ANSI_K), UInt32(controlKey | optionKey | cmdKey),
                                       hotKeyID, GetEventDispatcherTarget(), 0, &hotKeyRef)
-        if err != noErr { NSLog("DisplayDisconnect: hot key registration failed \(err)") }
+        if err != noErr { NSLog("ScreenToggle: hot key registration failed \(err)") }
     }
 
     private var blackoutCheck: DispatchWorkItem?
@@ -234,7 +234,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 try SMAppService.mainApp.register()
             }
         } catch {
-            NSLog("DisplayDisconnect: launch-at-login failed: \(error)")
+            NSLog("ScreenToggle: launch-at-login failed: \(error)")
             NSSound.beep()
         }
     }

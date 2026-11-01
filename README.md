@@ -1,18 +1,18 @@
-# DisplayDisconnect
+# ScreenToggle
 
 Menu bar app: ngắt / kết nối lại màn hình (giống "Connect this display" của BetterDisplay).
 
 ## Build & chạy
     xcode-select --install     # nếu chưa có
     ./build.sh
-    open DisplayDisconnect.app
+    open ScreenToggle.app
 
 Biểu tượng màn hình xuất hiện trên menu bar. Mỗi màn hình có dấu tick = đang kết nối; bấm để ngắt/nối lại.
 
 ## CLI
-    DisplayDisconnect.app/Contents/MacOS/DisplayDisconnect list
-    DisplayDisconnect.app/Contents/MacOS/DisplayDisconnect disconnect <id>
-    DisplayDisconnect.app/Contents/MacOS/DisplayDisconnect connect <id>
+    ScreenToggle.app/Contents/MacOS/ScreenToggle list
+    ScreenToggle.app/Contents/MacOS/ScreenToggle disconnect <id>
+    ScreenToggle.app/Contents/MacOS/ScreenToggle connect <id>
 
 ## An toàn
 - Không cho ngắt màn hình cuối cùng còn hoạt động.
