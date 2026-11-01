@@ -214,6 +214,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         login.target = self
         login.state = SMAppService.mainApp.status == .enabled ? .on : .off
         menu.addItem(login)
+        let about = NSMenuItem(title: "About ScreenToggle", action: #selector(showAbout), keyEquivalent: "")
+        about.target = self
+        menu.addItem(about)
         let q = NSMenuItem(title: "Quit", action: #selector(quit), keyEquivalent: "q")
         q.target = self
         menu.addItem(q)
@@ -245,6 +248,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             NSLog("ScreenToggle: launch-at-login failed: \(error)")
             NSSound.beep()
         }
+    }
+
+    /// Standard About panel: icon, name, "Version <CFBundleShortVersionString> (<CFBundleVersion>)".
+    @objc private func showAbout() {
+        NSApp.activate(ignoringOtherApps: true) // menu bar apps aren't frontmost; bring the panel forward
+        NSApp.orderFrontStandardAboutPanel(options: [
+            .credits: NSAttributedString(string: "github.com/omaika/ScreenToggle"),
+        ])
     }
 
     @objc private func quit() { NSApp.terminate(nil) }
