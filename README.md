@@ -1,30 +1,38 @@
 # ScreenToggle
 
-Menu bar app: ngắt / kết nối lại màn hình (giống "Connect this display" của BetterDisplay).
+A tiny macOS menu bar app to disconnect and reconnect displays — for example, turn off the
+built-in screen while using an external monitor (like BetterDisplay's "Connect this display").
 
-## Build & chạy
-    xcode-select --install     # nếu chưa có
+## Build & run
+    xcode-select --install     # if you don't have the Command Line Tools yet
     ./build.sh
     open ScreenToggle.app
 
-Biểu tượng màn hình xuất hiện trên menu bar. Mỗi màn hình có dấu tick = đang kết nối; bấm để ngắt/nối lại.
+A display icon appears in the menu bar. A checkmark means the display is connected; click a
+display to disconnect or reconnect it. Enable "Launch at Login" from the same menu.
 
 ## CLI
     ScreenToggle.app/Contents/MacOS/ScreenToggle list
     ScreenToggle.app/Contents/MacOS/ScreenToggle disconnect <id>
     ScreenToggle.app/Contents/MacOS/ScreenToggle connect <id>
 
-## An toàn
-- Không cho ngắt màn hình cuối cùng còn hoạt động.
-- Thay đổi chỉ áp dụng cho phiên đăng nhập (reboot/đăng xuất sẽ khôi phục).
-- Thoát app sẽ tự nối lại các màn hình do app đã ngắt; "Reconnect All" nối lại tất cả.
-- Rút màn hình ngoài khi màn built-in đang bị ngắt: app tự bật lại màn built-in sau ~1 giây (thử lại tối đa 5 lần).
-- Máy thức dậy sau sleep/hibernate (vd. hết pin) mà không còn màn hình nào hoạt động: app cũng tự bật lại.
-- Hết pin / mất điện làm máy tắt hẳn: khởi động lại sẽ khôi phục mọi màn hình (thay đổi chỉ theo phiên).
-- Phím tắt toàn cục **⌃⌥⌘K** (Control + Option + Command + K) = "Reconnect All", dùng được cả khi màn hình đen,
-  ví dụ màn hình ngoài mất nguồn nhưng macOS vẫn coi là đang cắm nên app không tự phát hiện được.
-- Nếu vẫn tối: chạy `... connect <id>` qua SSH, hoặc khởi động lại.
-- Các cơ chế tự khôi phục chỉ hoạt động khi app đang chạy trên menu bar (nên bật "Launch at Login").
+## Safety
+- The last active display can never be disconnected.
+- Changes apply to the current login session only; logging out or rebooting restores all displays.
+- Quitting the app reconnects every display it turned off; "Reconnect All" reconnects everything.
+- Unplugging the external monitor while the built-in screen is off: the app turns the built-in
+  screen back on after ~1 second (retrying up to 5 times).
+- Waking from sleep/hibernation (e.g. after the battery ran low) with no active display: the app
+  turns one back on as well.
+- Battery dies or power is lost and the Mac shuts down: the next boot restores all displays.
+- Global hot key **⌃⌥⌘K** (Control + Option + Command + K) = "Reconnect All". It works even on a
+  black screen, e.g. when the external monitor loses power but macOS still reports it as connected,
+  so the app cannot detect it on its own.
+- Still black? Run `... connect <id>` over SSH, or reboot.
+- The automatic recovery only works while the app is running in the menu bar, so keep
+  "Launch at Login" on.
 
-## Lưu ý
-Dùng hàm riêng (private) `CGSConfigureDisplayEnabled` của CoreGraphics — cùng kỹ thuật các công cụ tương tự dùng — nên Apple có thể thay đổi ở bản macOS sau. Đã chạy thử trên macOS 26 (Darwin 25).
+## Notes
+Uses the private CoreGraphics function `CGSConfigureDisplayEnabled` (there is no public API for
+this, and similar tools use the same technique), so a future macOS release may break it.
+Tested on macOS 26 (Darwin 25).
