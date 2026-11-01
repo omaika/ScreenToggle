@@ -3,6 +3,18 @@
 A tiny macOS menu bar app to disconnect and reconnect displays — for example, turn off the
 built-in screen while using an external monitor (like BetterDisplay's "Connect this display").
 
+## Download
+Grab `ScreenToggle-vX.Y.Z.zip` from [Releases](https://github.com/omaika/ScreenToggle/releases)
+(universal binary, macOS 13+), unzip it and move `ScreenToggle.app` to `/Applications`.
+The app is ad-hoc signed, not notarized, so macOS blocks the first launch. Allow it once with:
+
+    xattr -dr com.apple.quarantine /Applications/ScreenToggle.app
+
+## Releasing
+Push a version tag; GitHub Actions builds the app and publishes the release:
+
+    git tag v1.0.0 && git push origin v1.0.0
+
 ## Build & run
     xcode-select --install     # if you don't have the Command Line Tools yet
     ./build.sh
