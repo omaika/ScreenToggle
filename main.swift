@@ -27,7 +27,14 @@ enum DisplayManager {
         guard count > 0 else { return [] }
         var list = [CGDirectDisplayID](repeating: 0, count: Int(count))
         _ = online ? CGGetOnlineDisplayList(count, &list, &count) : CGGetActiveDisplayList(count, &list, &count)
-        return Array(list.prefix(Int(count)))
+        return list.prefix(Int(count)).filter { !isPlaceholder($0) }
+    }
+
+    /// When the last real display goes away (e.g. the external monitor is unplugged while the
+    /// built-in one is disabled), macOS swaps in an "active" virtual 1920x1080 display with
+    /// vendor 'unkn' and model 'virt' that shows nothing. It must not count as a real display.
+    static func isPlaceholder(_ id: CGDirectDisplayID) -> Bool {
+        CGDisplayVendorNumber(id) == 0x756e_6b6e // 'unkn'
     }
 
     static func list() -> [DisplayInfo] {
@@ -131,7 +138,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // Watch for displays being unplugged so we never end up with every screen disabled.
         CGDisplayRegisterReconfigurationCallback({ _, flags, _ in
             guard !flags.contains(.beginConfigurationFlag),
-                  flags.contains(.removeFlag) || flags.contains(.disabledFlag) else { return }
+                  flags.contains(.removeFlag) || flags.contains(.disabledFlag) || flags.contains(.addFlag)
+            else { return }
             DispatchQueue.main.async { (NSApp.delegate as? AppDelegate)?.scheduleBlackoutCheck() }
         }, nil)
         scheduleBlackoutCheck()
